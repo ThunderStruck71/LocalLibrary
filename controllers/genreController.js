@@ -44,7 +44,7 @@ exports.genre_detail = function (req, res, next) {
 };
 
 // Display Genre create form on GET.
-exports.genre_create_get = function (req, res, next) {
+exports.genre_create_get = function (req, res) {
     res.render('genre_form', { title: 'Create Genre' });
 };
 
@@ -98,7 +98,7 @@ exports.genre_create_post = [
 ];
 
 // Display Genre delete form on GET.
-exports.genre_delete_get = function (req, res) {
+exports.genre_delete_get = function (req, res, next) {
     async.parallel({
         genre: function (callback) {
             Genre.findById(req.params.id).exec(callback)
@@ -118,7 +118,7 @@ exports.genre_delete_get = function (req, res) {
 };
 
 // Handle Genre delete on POST.
-exports.genre_delete_post = function (req, res) {
+exports.genre_delete_post = function (req, res, next) {
     async.parallel({
         genre: function (callback) {
             Genre.findById(req.body.genreid).exec(callback)
@@ -146,7 +146,7 @@ exports.genre_delete_post = function (req, res) {
 };
 
 // Display Genre update form on GET.
-exports.genre_update_get = function (req, res) {
+exports.genre_update_get = function (req, res, next) {
     // Get genre for form.
     async.parallel({
         genre: function (callback) {
@@ -155,7 +155,7 @@ exports.genre_update_get = function (req, res) {
     }, function (err, results) {
         if (err) { return next(err); }
         if (results.genre == null) { // No results.
-            var err = new Error('Book not found');
+            var err = new Error('Genre not found');
             err.status = 404;
             return next(err);
         }
@@ -167,7 +167,7 @@ exports.genre_update_get = function (req, res) {
 // Handle Genre update on POST.
 exports.genre_update_post = [
     // Validate and sanitise fields.
-    body('name', 'Genre name must contain at least 3 characters.').trim().isLength({ min: 3 }).escape(),
+    body('name', 'Title must not be empty.').trim().isLength({ min: 3 }).escape(),
 
     // Process request after validation and sanitization.
     (req, res, next) => {
