@@ -135,7 +135,7 @@ exports.genre_delete_post = function (req, res) {
             return;
         }
         else {
-            // Genre has no books. Delete object and redirect to the list of authors.
+            // Genre has no books. Delete object and redirect to the list of genres.
             Genre.findByIdAndRemove(req.body.genreid, function deleteGenre(err) {
                 if (err) { return next(err); }
                 // Success - go to genre list
