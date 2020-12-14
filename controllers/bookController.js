@@ -159,25 +159,48 @@ exports.book_create_post = [
 // Display book delete form on GET.
 exports.book_delete_get = function (req, res) {
     async.parallel({
-        author: function (callback) {
-            Author.findById(req.params.id).exec(callback)
+        book: function (callback) {
+            Book.findById(req.params.id).exec(callback)
         },
-        authors_books: function (callback) {
-            Book.find({ 'author': req.params.id }).exec(callback)
+        book_instances: function (callback) {
+            BookInstance.find({ 'book': req.params.id }).exec(callback)
         },
     }, function (err, results) {
         if (err) { return next(err); }
-        if (results.author == null) { // No results.
-            res.redirect('/catalog/book');
+        if (results.book == null) { // No results.
+            res.redirect('/catalog/books');
         }
         // Successful, so render.
-        res.render('book_delete', { title: 'Delete Book', author: results.author, author_books: results.authors_books });
-    });
+        res.render('book_delete', { title: 'Delete Book', book: results.book, book_instances: results.book_instances });
+    });  
 };
 
 // Handle book delete on POST.
 exports.book_delete_post = function (req, res) {
-    res.send('NOT IMPLEMENTED: Book delete POST');
+    async.parallel({
+        book: function (callback) {
+            Book.findById(req.body.bookid).exec(callback)
+        },
+        book_instances: function (callback) {
+            BookInstance.find({ 'book': req.body.bookid }).exec(callback)
+        },
+    }, function (err, results) {
+        if (err) { return next(err); }
+        // Success
+        if (results.book_instances.length > 0) {
+            // Book has copies. Render in same way as for GET route.
+            res.render('book_delete', { title: 'Delete Book', book: results.book, book_instances: results.book_instances });
+            return;
+        }
+        else {
+            // Book has no copies. Delete object and redirect to the list of books.
+            Book.findByIdAndRemove(req.body.bookid, function deleteBook(err) {
+                if (err) { return next(err); }
+                // Success - go to book list
+                res.redirect('/catalog/books')
+            })
+        }
+    });
 };
 
 // Display book update form on GET.
